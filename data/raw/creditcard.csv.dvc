@@ -1,0 +1,6 @@
+outs:
+- md5: c41e25a6f8f249bfc9c4a7e963920f24
+  size: 370333
+  isexec: true
+  hash: md5
+  path: creditcard.csv

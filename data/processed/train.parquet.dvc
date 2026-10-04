@@ -1,0 +1,6 @@
+outs:
+- md5: ec5d379b737af013c3cb36542bc5a4b9
+  size: 128476
+  isexec: true
+  hash: md5
+  path: train.parquet

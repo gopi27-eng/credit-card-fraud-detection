@@ -11,21 +11,30 @@ __pycache__/
 # Logs
 logs/
 
-# data
-data/
 
 # MLflow tracking
 mlruns/
 mlruns_store/
 mlflow.db
 
-# Terraform state
-terraform/.terraform/
-terraform/terraform.tfstate
-terraform/terraform.tfstate.backup
-terraform/.terraform.lock.hcl
 
 # System files
 .DS_Store
 Thumbs.db
 .vscode/
+
+
+# Ignore actual heavy data artifacts, but ALLOW .dvc metadata files
+data/raw/*
+!data/raw/*.dvc
+!data/raw/.gitkeep
+
+data/processed/*
+!data/processed/*.dvc
+!data/processed/.gitkeep
+
+# Terraform local state (keep secrets out of git)
+terraform-s3/.terraform/
+terraform-s3/*.tfstate*
+terraform-s3/.terraform.lock.hcl
+
