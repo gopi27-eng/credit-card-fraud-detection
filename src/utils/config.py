@@ -1,18 +1,22 @@
 from pathlib import Path
-from typing import List, Optional
+from typing import Any, Dict, List
+from pydantic import BaseModel, ConfigDict
 import yaml
-from pydantic import BaseModel, ConfigDict, Field
+
+
+class BaseConfig(BaseModel):
+    project_name: str
+    random_state: int
+    model_config = ConfigDict(extra="forbid")
 
 
 class SplitConfig(BaseModel):
-    test_size: float = Field(default=0.2, gt=0.0, lt=1.0)
-    stratify: bool = Field(default=True)
+    test_size: float
+    stratify: bool
     model_config = ConfigDict(extra="forbid")
 
 
 class DataConfig(BaseModel):
-    """Configuration for data paths, features, and split parameters."""
-
     raw_data_path: Path
     processed_train_path: Path
     processed_test_path: Path
@@ -25,39 +29,33 @@ class DataConfig(BaseModel):
     categorical_features: List[str]
     binary_features: List[str]
     split: SplitConfig
-
     model_config = ConfigDict(extra="forbid")
 
-class BaseConfig(BaseModel):
-    project_name: str
-    random_state: int = Field(default=42)
+
+class ModelConfig(BaseModel):
+    artifact_path: Path
+    algorithm: str
+    params: Dict[str, Any]
     model_config = ConfigDict(extra="forbid")
 
 
 class MLflowConfig(BaseModel):
     experiment_name: str
-    tracking_uri: Optional[str] = None
+    tracking_uri: str = "https://dagshub.com"
     model_config = ConfigDict(extra="forbid")
 
 
 class AppConfig(BaseModel):
     base: BaseConfig
     data: DataConfig
+    model: ModelConfig
     mlflow: MLflowConfig
     model_config = ConfigDict(extra="forbid")
 
 
-def load_config(config_path: str = "config/config.yaml") -> AppConfig:
-    """Loads and validates application configuration from a YAML file."""
-    path = Path(config_path)
-    if not path.is_file():
-        raise FileNotFoundError(f"Configuration file not found at: {path.resolve()}")
-
-    with open(path, "r", encoding="utf-8") as f:
-        raw_dict = yaml.safe_load(f)
-
-    if not isinstance(raw_dict, dict):
-        raise ValueError(f"Invalid YAML content in {path}. Expected key-value mapping.")
-
-    return AppConfig(**raw_dict)
-
+def load_config(config_path: Path = Path("config/config.yaml")) -> AppConfig:
+    if not config_path.is_file():
+        raise FileNotFoundError(f"Configuration file not found at: {config_path}")
+    with open(config_path, "r", encoding="utf-8") as f:
+        raw_cfg = yaml.safe_load(f)
+    return AppConfig(**raw_cfg)

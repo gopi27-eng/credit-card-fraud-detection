@@ -26,6 +26,17 @@ data:
     test_size: 0.2
     stratify: true
 
+model:
+  artifact_path: "artifacts/model.joblib"
+  algorithm: "xgboost"
+  params:
+    n_estimators: 100
+    max_depth: 4
+    learning_rate: 0.05
+    subsample: 0.8
+    eval_metric: "aucpr"
+    random_state: 42
+
 mlflow:
   experiment_name: "credit-card-fraud-experiments"
-  tracking_uri: "https://dagshub.com"
+  tracking_uri: "https://dagshub.com/gopi27-eng/credit-card-fraud-detection.mlflow"
