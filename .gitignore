@@ -1,0 +1,31 @@
+# Python
+__pycache__/
+*.pyc
+
+# Virtual environment
+.venv/
+
+# Testing cache
+.pytest_cache/
+
+# Logs
+logs/
+
+# data
+data/
+
+# MLflow tracking
+mlruns/
+mlruns_store/
+mlflow.db
+
+# Terraform state
+terraform/.terraform/
+terraform/terraform.tfstate
+terraform/terraform.tfstate.backup
+terraform/.terraform.lock.hcl
+
+# System files
+.DS_Store
+Thumbs.db
+.vscode/

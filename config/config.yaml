@@ -1,0 +1,31 @@
+base:
+  project_name: "credit-card-fraud-detection"
+  random_state: 42
+
+data:
+  raw_data_path: "data/raw/creditcard.csv"
+  processed_train_path: "data/processed/train.parquet"
+  processed_test_path: "data/processed/test.parquet"
+  preprocessor_path: "artifacts/preprocessor.joblib"
+  transformed_train_path: "data/processed/train_transformed.parquet"
+  transformed_test_path: "data/processed/test_transformed.parquet"
+  target_column: "is_fraud"
+  id_column: "transaction_id"
+  numerical_features:
+    - "amount"
+    - "transaction_hour"
+    - "device_trust_score"
+    - "velocity_last_24h"
+    - "cardholder_age"
+  categorical_features:
+    - "merchant_category"
+  binary_features:
+    - "foreign_transaction"
+    - "location_mismatch"
+  split:
+    test_size: 0.2
+    stratify: true
+
+mlflow:
+  experiment_name: "credit-card-fraud-experiments"
+  tracking_uri: "https://dagshub.com"
