@@ -1,0 +1,23 @@
+# Web API & ASGI Server
+fastapi==0.142.2
+uvicorn==0.54.0
+
+# Inference Engine & Core ML
+scikit-learn==1.9.1
+xgboost==3.4.1
+numpy==2.5.3
+scipy==1.18.1
+joblib==1.6.0
+
+# Data Processing & Storage Formats
+pandas==3.0.6
+pyarrow==25.0.1
+
+# Schema & Configuration Validation
+pydantic==2.13.5
+PyYAML==6.0.3
+
+# Structured Logging & Networking
+python-json-logger==4.2.0
+httpx==0.28.1
+prometheus-client==0.21.1
