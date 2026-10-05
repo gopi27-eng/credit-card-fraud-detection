@@ -1,5 +1,5 @@
 from enum import Enum
-from typing import Literal
+from typing import Literal,List
 from pydantic import BaseModel, ConfigDict, Field
 
 class MerchantCategory(str, Enum):
@@ -107,3 +107,5 @@ class PredictionOutput(BaseModel):
     transaction_id: int
     is_fraud: int = Field(..., ge=0, le=1)
     fraud_probability: float = Field(..., ge=0.0, le=1.0)
+    
+TransactionInput = TransactionInferenceRequest
