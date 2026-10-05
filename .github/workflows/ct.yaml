@@ -1,12 +1,12 @@
 name: Continuous Training (CT)
 
 on:
-  workflow_dispatch: # Allows manual trigger from GitHub UI
+  workflow_dispatch:
   schedule:
-    - cron: '0 0 * * 0' # Weekly run (Sundays at midnight UTC)
+    - cron: '0 0 * * 0'
   push:
     paths:
-      - 'data.dvc' # Triggers retraining when new dataset hash is committed
+      - 'data/**.dvc'
 
 jobs:
   retrain:
@@ -42,7 +42,11 @@ jobs:
         run: |
           dvc pull -v
 
-      - name: Run Training Pipeline
+      - name: Run Data Transformation
+        run: |
+          python -m src.data.transformation
+
+      - name: Run Model Training
         env:
           MLFLOW_TRACKING_URI: ${{ secrets.MLFLOW_TRACKING_URI }}
           MLFLOW_TRACKING_USERNAME: ${{ secrets.MLFLOW_TRACKING_USERNAME }}
@@ -50,10 +54,10 @@ jobs:
         run: |
           python -m src.models.train
 
-      - name: Commit Updated Model Weights
+      - name: Commit Updated Artifacts
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add models/
+          git add artifacts/ models/
           git commit -m "chore(ct): retrain and update model artifacts [skip ci]" || echo "No changes to commit"
           git push origin main || echo "Nothing to push"
