@@ -38,9 +38,18 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: us-east-1
 
-      - name: Pull latest data via DVC
+      - name: Pull Processed Data via DVC
         run: |
-          dvc pull -v
+          dvc pull data/processed/train.parquet.dvc data/processed/test.parquet.dvc -v || true
+
+      - name: Verify Data or Fallback to Ingest
+        run: |
+          if [ ! -f "data/processed/train.parquet" ] || [ ! -f "data/processed/test.parquet" ]; then
+            echo "Parquet files missing after DVC pull. Running data ingestion..."
+            python -m src.data.ingest
+          else
+            echo "Processed parquet files successfully verified."
+          fi
 
       - name: Run Data Transformation
         run: |
