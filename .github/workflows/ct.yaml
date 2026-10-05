@@ -11,21 +11,25 @@ on:
 jobs:
   retrain:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write # Needed to push retrained model weights back to repo
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
-      - name: Set up Python 3.11
+      - name: Set up Python 3.12
         uses: actions/setup-python@v5
         with:
-          python-version: '3.11'
+          python-version: '3.12'
           cache: 'pip'
 
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
-          pip install dvc[s3]
+          pip install "dvc[s3]" mlflow
 
       - name: Configure AWS Credentials for DVC
         uses: aws-actions/configure-aws-credentials@v4
@@ -36,7 +40,7 @@ jobs:
 
       - name: Pull latest data via DVC
         run: |
-          dvc pull
+          dvc pull -v
 
       - name: Run Training Pipeline
         env:
@@ -47,6 +51,8 @@ jobs:
           python -m src.pipelines.train
 
       - name: Evaluate Model Performance Gate
+        env:
+          MLFLOW_TRACKING_URI: ${{ secrets.MLFLOW_TRACKING_URI }}
         run: |
           python -m src.pipelines.evaluate --threshold 0.85
 
