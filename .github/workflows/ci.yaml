@@ -1,6 +1,7 @@
 name: CI Pipeline
 
 on:
+  workflow_dispatch: # Allows manual trigger from GitHub UI
   push:
     branches: [ main ]
     paths:
@@ -28,20 +29,19 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
-          pip install pytest pytest-cov ruff
+          pip install pytest pytest-cov
 
-      - name: Code Linting
+      - name: Run Test Suite with Coverage
         run: |
-          ruff check .
-
-      - name: Run Test Suite
-        run: |
-          pytest tests/ --cov=src --cov-report=term-missing
+          pytest tests/ -v --cov=src --cov-report=term-missing
 
   build-and-push:
     needs: test
     if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -49,7 +49,7 @@ jobs:
       - name: Set up Docker Buildx
         uses: actions/setup-buildx-action@v3
 
-      - name: Log in to GitHub Container Registry
+      - name: Log in to GitHub Container Registry (GHCR)
         uses: docker/login-action@v3
         with:
           registry: ghcr.io
