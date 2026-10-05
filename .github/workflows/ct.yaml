@@ -1,0 +1,59 @@
+name: Continuous Training (CT)
+
+on:
+  workflow_dispatch: # Allows manual trigger from GitHub UI
+  schedule:
+    - cron: '0 0 * * 0' # Weekly run (Sundays at midnight UTC)
+  push:
+    paths:
+      - 'data.dvc' # Triggers retraining when new dataset hash is committed
+
+jobs:
+  retrain:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install dvc[s3]
+
+      - name: Configure AWS Credentials for DVC
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+
+      - name: Pull latest data via DVC
+        run: |
+          dvc pull
+
+      - name: Run Training Pipeline
+        env:
+          MLFLOW_TRACKING_URI: ${{ secrets.MLFLOW_TRACKING_URI }}
+          MLFLOW_TRACKING_USERNAME: ${{ secrets.MLFLOW_TRACKING_USERNAME }}
+          MLFLOW_TRACKING_PASSWORD: ${{ secrets.MLFLOW_TRACKING_PASSWORD }}
+        run: |
+          python -m src.pipelines.train
+
+      - name: Evaluate Model Performance Gate
+        run: |
+          python -m src.pipelines.evaluate --threshold 0.85
+
+      - name: Commit Updated Model Weights
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add models/
+          git commit -m "chore(ct): retrain and update model artifacts [skip ci]" || echo "No changes to commit"
+          git push origin main || echo "Nothing to push"
